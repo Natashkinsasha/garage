@@ -11,13 +11,17 @@
   "dependencies": {
     "aphrodite": "^1.1.0",
     "axios": "^0.15.3",
+    "formsy-semantic-ui-react": "^0.2.0",
     "lodash": "^4.17.4",
-    "moment": "^2.17.1",
+    "moment": "^2.18.1",
+    "radium": "^0.18.2",
     "react": "^15.4.2",
+    "react-datepicker": "^0.44.0",
     "react-dom": "^15.4.2",
     "react-redux": "^5.0.2",
     "react-router": "^3.0.2",
     "react-router-redux": "^4.0.8",
+    "react-text-mask": "^4.1.0",
     "redux": "^3.6.0",
     "redux-auth-wrapper": "^1.0.0",
     "redux-localstorage-simple": "^1.2.0",
@@ -26,7 +30,8 @@
     "redux-thunk": "^2.2.0",
     "router": "^1.2.0",
     "semantic-ui-css": "^2.2.4",
-    "semantic-ui-react": "^0.64.8"
+    "semantic-ui-react": "^0.64.8",
+    "semantic-ui-react-numberpicker": "0.0.1-b"
   },
   "devDependencies": {
     "autoprefixer-loader": "*",

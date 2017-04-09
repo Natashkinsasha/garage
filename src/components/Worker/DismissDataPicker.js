@@ -1,0 +1,10 @@
+import React from 'react';
+import DatePicker from 'react-datepicker';
+require('react-datepicker/dist/react-datepicker.css');
+
+const DismissDataPicker = (props) => {
+    return (
+        <DatePicker {...props} isClearable={true}/>
+    );
+};
+export default DismissDataPicker;

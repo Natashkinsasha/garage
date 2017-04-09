@@ -1,5 +1,6 @@
 import React from 'react';
 import {Table, Input, Form, Header, Grid} from 'semantic-ui-react';
+import NumberPicker from 'semantic-ui-react-numberpicker';
 
 const Worksheet = () => {
     return (

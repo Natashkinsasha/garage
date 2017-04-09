@@ -12,7 +12,9 @@ import {
     Divider,
     Dropdown
 } from 'semantic-ui-react';
+import DismissDatePicker from './DismissDataPicker';
 import {connect} from 'react-redux';
+import PhoneMaskedInput from './PhoneMaskedInput';
 import DriverFields from './DriverFields.jsx';
 import RiggerFields from './RiggerFields.jsx';
 
@@ -48,25 +50,27 @@ class Worker extends React.Component {
                             </Header>
                             <Form loading={this.state.formLoading}>
                                 <Form.Input label='Имя'
+                                            required
                                             value={this.state.firstName}
                                             onChange={(e) => {
                                                 this.setState({firstName: e.target.value});
                                             }}/>
                                 <Form.Input label='Фамилия'
+                                            required
                                             value={this.state.secondName}
                                             onChange={(e) => {
                                                 this.setState({secondName: e.target.value});
                                             }}/>
-                                <Form.Input label='Телефон'
-                                            value={this.state.telephone}
-                                            onChange={(e) => {
-                                                this.setState({telephone: e.target.value});
-                                            }}/>
-                                <Form.Input label='Дата увольнения'
-                                            onChange={(e) => {
-                                                onChange({dismissalData: e.target.value});
-                                            }}/>
+                                <Form.Field label='Телефон' value={this.state.telephone} onChange={(e) => {
+                                    this.setState({telephone: e.target.value});
+                                }} control={PhoneMaskedInput}/>
+                                <Form.Field label='Дата увольнения'
+                                            selected={this.state.dismissalData}
+                                            onChange={(date) => {
+                                                this.setState({dismissalData: date});
+                                            }} control={DismissDatePicker}/>
                                 <Form.Dropdown label='Должности' multiple selection
+                                               required
                                                options={this.props.positions}
                                                onChange={(e, data) => {
                                                    return this.setState({positions: data.value,});

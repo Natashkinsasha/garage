@@ -43,7 +43,9 @@ class Equipment extends React.Component {
                                 Добавления техники
                             </Header>
                             <Form loading={this.state.formLoading}>
-                                <Form.Dropdown label='Тип' selection
+                                <Form.Dropdown label='Тип'
+                                               required
+                                               selection
                                                options={this.props.types}
                                                onChange={(e, data) => {
                                                    this.setState({type: data.value})
