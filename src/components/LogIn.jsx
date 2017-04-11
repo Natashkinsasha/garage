@@ -1,11 +1,12 @@
 import React from 'react';
-import {Checkbox, Form, Input, Select, Segment, Button, Grid, Header, Message, Divider} from 'semantic-ui-react';
+import {Checkbox, Form, Input, Select, Segment, Button, Grid, Header, Message, Divider, Icon} from 'semantic-ui-react';
 import {connect} from 'react-redux';
 import {login} from '../api/user';
 import {
     loginSuccess,
     loginUnsuccess
 } from '../actions/user';
+import SocialButton from './SocialButton';
 import {push, goBack} from 'react-router-redux';
 
 
@@ -49,12 +50,13 @@ class LogIn extends React.Component {
                                     e.preventDefault();
                                     this.submit({login: this.state.login, password: this.state.password});
                                 }}>Отправить</Button>
-                                <Divider horizontal></Divider>
+                                <Divider fitted/>
                                 <Button fluid color='orange' onClick={(e) => {
                                     e.preventDefault();
                                     this.props.goBack();
                                 }}>Назад</Button>
-
+                                <Divider/>
+                                <SocialButton/>
                             </Form>
                         </Segment>
                     </Grid.Column>
@@ -80,7 +82,7 @@ export default connect(null, (dispatch) => (
             });
         },
         goBack: () => {
-          return dispatch(goBack());
+            return dispatch(goBack());
         }
     }
 ))(LogIn);

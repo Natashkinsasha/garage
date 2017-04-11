@@ -1,24 +1,39 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import Promise from 'bluebird';
 
 import {Table, Checkbox, Button, Dimmer, Loader, Segment, Modal, Form, Grid} from 'semantic-ui-react';
 
-import WorkerInfoPanel from './WorkerInfoPanel.jsx';
+import WorkerCard from './WorkerCard.jsx';
+import WorkerTable from './WorkerTable.jsx';
+
+import find from 'lodash/find';
+
 class Workers extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            isActiveWorkerTable: false
+            isActiveWorkerTable: false,
+            selectedWorker: null,
+            selectedWorkers: [],
         }
     }
 
 
-    deleteWorkers = (ids) => {
-        this.setState({isActiveWorkersTable: false});
-        this.props.deleteWorkers(ids).then(() => {
-            this.setState({isActiveWorkersTable: true});
+    deleteWorkers = () => {
+        this.setState({isActiveWorkersTable: true});
+        this.props.deleteWorkers(this.state.selectedWorkers).then(() => {
+            this.setState({isActiveWorkersTable: false});
         });
+    };
+
+    onSelectWorker = (id) => {
+        this.setState({selectedWorker: find(this.props.workers, {'id': id})})
+    };
+
+    onSelectedWorkers = (workers) => {
+        this.setState({selectedWorkers: workers});
     };
 
     render() {
@@ -30,11 +45,15 @@ class Workers extends React.Component {
                             <Dimmer active={this.state.isActiveWorkersTable} inverted>
                                 <Loader />
                             </Dimmer>
-                            <WorkersTable workers={this.props.workers}/>
+                            <WorkerTable workers={this.props.workers}
+                                         onRowClick={this.onSelectWorker}
+                                         onSelected={this.onSelectedWorkers}
+                                         onDeleteWorkers={this.deleteWorkers}
+                            />
                         </Segment>
                     </Grid.Column>
                     <Grid.Column width={5}>
-                        <WorkerInfoPanel/>
+                        <WorkerCard worker={this.state.selectedWorker}/>
                     </Grid.Column>
                 </Grid.Row>
             </Grid>
@@ -46,58 +65,19 @@ class Workers extends React.Component {
 export default connect(state => {
     return {
         workers: [
-            {firstName: 'Иванов', secondName: 'Иван', positions: ['driver']},
-            {firstName: 'Петров', secondName: 'Петр', positions: ['rigger', 'mechanic']},
-            {firstName: 'Никитич', secondName: 'Никита', positions: ['machinist']},
-            {firstName: 'Наташкна', secondName: 'Наталья', positions: ['accountant']},
+            {id: 0, positions: ['driver']},
+            {id: 1, firstName: 'Петров', secondName: 'Петр', positions: ['rigger', 'mechanic']},
+            {id: 2, firstName: 'Никитич', secondName: 'Никита', positions: ['machinist']},
+            {id: 3, firstName: 'Наташкна', secondName: 'Наталья', positions: ['accountant']},
         ]
+    }
+}, dispatch =>{
+    return {
+        deleteWorkers: ()=>{
+            return Promise.resolve().delay(1000);
+        }
     }
 })(Workers);
 
-const WorkersTable = ({workers}) => {
-    return (
-        <Table size="small" celled selectable tableData={workers}
-               headerRow={<WorkersTableHeader/>}
-               footerRow={<WorkersTableFooter/>}
-               renderBodyRow={(data, index) => {
-                   return <WorkersTableRow worker={data} key={index}/>;
-               }}/>
-    )
-};
 
-
-const WorkersTableHeader = () => {
-    return (
-        <Table.Row>
-            <Table.HeaderCell><Checkbox/></Table.HeaderCell>
-            <Table.HeaderCell>Фамилия, инициалы</Table.HeaderCell>
-            <Table.HeaderCell>Должности</Table.HeaderCell>
-        </Table.Row>
-    );
-};
-
-
-const WorkersTableRow = ({worker, key}) => {
-    return (
-        <Table.Row key={key} onClick={() => {
-        }}>
-            <Table.Cell><Checkbox onClick={(e) => {
-                e.stopPropagation();
-            }}/></Table.Cell>
-            <Table.Cell>{worker.firstName}</Table.Cell>
-            <Table.Cell>{worker.positions}</Table.Cell>
-        </Table.Row>
-    );
-};
-
-const WorkersTableFooter = () => {
-    return (
-        <Table.Row>
-            <Table.HeaderCell colSpan='4'>
-                <Button size='small' positive>Добавить работника</Button>
-                <Button size='small' negative>Удалить работников</Button>
-            </Table.HeaderCell>
-        </Table.Row>
-    );
-};
 

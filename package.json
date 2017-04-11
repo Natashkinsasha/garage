@@ -11,6 +11,7 @@
   "dependencies": {
     "aphrodite": "^1.1.0",
     "axios": "^0.15.3",
+    "bluebird": "^3.5.0",
     "formsy-semantic-ui-react": "^0.2.0",
     "lodash": "^4.17.4",
     "moment": "^2.18.1",

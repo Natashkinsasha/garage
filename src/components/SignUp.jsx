@@ -6,7 +6,7 @@ import {
     singUpSuccess,
     singUpUnsuccess
 } from '../actions/user';
-
+import SocialButton from './SocialButton';
 import {push, goBack} from 'react-router-redux';
 
 
@@ -73,12 +73,13 @@ class SignUp extends React.Component {
                                     e.preventDefault();
                                     this.signUp({login: this.state.login, password: this.state.password});
                                 }}>Отправить</Button>
-                                <Divider horizontal></Divider>
+                                <Divider fitted/>
                                 <Button fluid color='orange' onClick={(e) => {
                                     e.preventDefault();
                                     this.props.goBack();
                                 }}>Назад</Button>
-
+                                <Divider/>
+                                <SocialButton/>
                             </Form>
                         </Segment>
                     </Grid.Column>
