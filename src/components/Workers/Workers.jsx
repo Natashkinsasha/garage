@@ -16,14 +16,14 @@ class Workers extends React.Component {
         this.state = {
             isActiveWorkerTable: false,
             selectedWorker: null,
-            selectedWorkers: [],
+            selectedRow: [],
         }
     }
 
 
     deleteWorkers = () => {
         this.setState({isActiveWorkersTable: true});
-        this.props.deleteWorkers(this.state.selectedWorkers).then(() => {
+        this.props.deleteWorkers(this.state.checkeds).then(() => {
             this.setState({isActiveWorkersTable: false});
         });
     };
@@ -32,8 +32,9 @@ class Workers extends React.Component {
         this.setState({selectedWorker: find(this.props.workers, {'id': id})})
     };
 
-    onSelectedWorkers = (workers) => {
-        this.setState({selectedWorkers: workers});
+    onSelectedWorkers = (selected) => {
+        console.log(selected);
+        this.setState({selectedRow: selected});
     };
 
     render() {
