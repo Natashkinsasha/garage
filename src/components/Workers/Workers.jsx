@@ -1,6 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import Promise from 'bluebird';
+import * as workerApi from '../../api/worker';
 
 import {Table, Checkbox, Button, Dimmer, Loader, Segment, Modal, Form, Grid} from 'semantic-ui-react';
 
@@ -16,9 +17,18 @@ class Workers extends React.Component {
         this.state = {
             isActiveWorkerTable: false,
             selectedWorker: null,
-            selectedRow: [],
+            selectedWorkers: [],
+            workers: [],
+            pageSize: 10,
+            currentPage: 1,
+            pages: 0,
         }
     }
+
+    componentDidMount = () => {
+
+        this.onChange({currentPage: this.state.currentPage, pageSize: this.state.pageSize});
+    };
 
 
     deleteWorkers = () => {
@@ -33,8 +43,25 @@ class Workers extends React.Component {
     };
 
     onSelectedWorkers = (selected) => {
-        console.log(selected);
-        this.setState({selectedRow: selected});
+        this.setState({selectedWorkers: selected});
+    };
+
+    onChange = ({currentPage, pageSize, sortedColumn, direction}) => {
+        console.log({currentPage, pageSize, sortedColumn, direction})
+        this.setState({isActiveWorkerTable: true}, () => {
+            this.props.getWorkers({page: currentPage, number: pageSize})
+                .then(({docs, page, pages, limit}) => {
+                    this.setState({
+                        workers: docs,
+                        pageSize: limit,
+                        currentPage: page,
+                        pages,
+                    })
+                })
+                .finally(() => {
+                    this.setState({isActiveWorkerTable: false});
+                })
+        });
     };
 
     render() {
@@ -43,13 +70,17 @@ class Workers extends React.Component {
                 <Grid.Row>
                     <Grid.Column width={11}>
                         <Segment>
-                            <Dimmer active={this.state.isActiveWorkersTable} inverted>
+                            <Dimmer active={this.state.isActiveWorkerTable} inverted>
                                 <Loader />
                             </Dimmer>
-                            <WorkerTable workers={this.props.workers}
+                            <WorkerTable workers={this.state.workers}
+                                         pageSize={this.state.pageSize}
+                                         currentPage={this.state.currentPage}
+                                         pages={this.state.pages}
                                          onRowClick={this.onSelectWorker}
                                          onSelected={this.onSelectedWorkers}
                                          onDeleteWorkers={this.deleteWorkers}
+                                         onChange={this.onChange}
                             />
                         </Segment>
                     </Grid.Column>
@@ -63,19 +94,13 @@ class Workers extends React.Component {
 
 }
 
-export default connect(state => {
+export default connect(null, dispatch => {
     return {
-        workers: [
-            {id: 0, positions: ['driver']},
-            {id: 1, firstName: 'Петров', secondName: 'Петр', positions: ['rigger', 'mechanic']},
-            {id: 2, firstName: 'Никитич', secondName: 'Никита', positions: ['machinist']},
-            {id: 3, firstName: 'Наташкна', secondName: 'Наталья', positions: ['accountant']},
-        ]
-    }
-}, dispatch =>{
-    return {
-        deleteWorkers: ()=>{
+        deleteWorkers: () => {
             return Promise.resolve().delay(1000);
+        },
+        getWorkers: ({page, number}) => {
+            return workerApi.get({page, number}).get('data');
         }
     }
 })(Workers);

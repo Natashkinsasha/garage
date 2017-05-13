@@ -45,11 +45,10 @@ module.exports = {
         contentBase: "./public",
         port: 8000,
         proxy: {
-            '/api': {
-                target: {'host': 'localhost', 'port': 8080, 'protocol': 'http:'},
+            '/api/**': {
+                target: 'http://localhost:3001',
                 secure: false,
                 changeOrigin: true,
-                secure : false,
             },
         },
         historyApiFallback: true

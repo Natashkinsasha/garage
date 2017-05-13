@@ -24,8 +24,7 @@ class WorkerTable extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            checkeds: Array.apply(null, {length: this.props.workers.length}).fill(false),
-            pageSize: 4,
+            checkeds: [],
         }
     }
 
@@ -53,10 +52,31 @@ class WorkerTable extends React.Component {
     };
 
     onChangePageSize = (pageSize) => {
-        console.log('-----------');
-        console.log(pageSize);
-        this.setState({pageSize: ''});
-    }
+        this.props.onChange({
+            currentPage: this.props.currentPage,
+            pageSize,
+            sortedColumn: this.props.sortedColumn,
+            direction: this.props.direction
+        });
+    };
+
+    onChangeCurrentPage = (currentPage) => {
+        this.props.onChange({
+            currentPage,
+            pageSize: this.props.pageSize,
+            sortedColumn: this.props.sortedColumn,
+            direction: this.props.direction
+        });
+    };
+
+    onChangeSort = (sortedColumn, direction) => {
+        this.props.onChange({
+            currentPage: this.props.currentPage,
+            pageSize: this.props.pageSize,
+            sortedColumn,
+            direction,
+        });
+    };
 
 
     render() {
@@ -64,11 +84,15 @@ class WorkerTable extends React.Component {
             <div>
                 <Table size="small" celled selectable tableData={this.props.workers}
                        headerRow={<WorkersTableHeader checkeds={this.state.checkeds}
-                                                      onClickCheckbox={this.onClickHeaderCheckbox}/>}
+                                                      onClickCheckbox={this.onClickHeaderCheckbox}
+                                                      onChangeSort={this.onChangeSort}
+                       />}
                        footerRow={<WorkersTableFooter onDeleteWorkers={this.props.onDeleteWorkers}
-                                                      size={this.props.size || this.props.workers.length}
-                                                      pageSize={this.state.pageSize}
+                                                      pages={this.props.pages}
+                                                      pageSize={this.props.pageSize}
+                                                      currentPage={this.props.currentPage}
                                                       onChangePageSize={this.onChangePageSize}
+                                                      onChangeCurrentPage={this.onChangeCurrentPage}
                        />}
                        renderBodyRow={(data, index) => {
                            return <WorkersTableRow key={data.id} index={index} worker={data}
@@ -100,7 +124,7 @@ WorkerTable.propTypes = {
 const WorkersTableHeader = ({onClickCheckbox, checkeds}) => {
     return (
         <Table.Row>
-            <Table.HeaderCell><Checkbox checked={!checkeds.includes(false)} onClick={(e) => {
+            <Table.HeaderCell><Checkbox checked={!isEmpty(checkeds) && !checkeds.includes(false)} onClick={(e) => {
                 e.stopPropagation();
                 onClickCheckbox();
             }}/></Table.HeaderCell>
@@ -126,37 +150,41 @@ const WorkersTableRow = ({worker, index, onClick, onClickCheckbox, checked}) => 
     );
 };
 
-const WorkersTableFooter = ({onDeleteWorkers, size, pageSize, onChangePageSize}) => {
+const WorkersTableFooter = ({onDeleteWorkers, pages, pageSize, currentPage, onChangePageSize, onChangeCurrentPage}) => {
     return (
         <Table.Row>
             <Table.HeaderCell colSpan='4'>
                 <Button size='small' positive>Добавить работника</Button>
                 <Button size='small' negative onClick={onDeleteWorkers}>Удалить работников</Button>
                 <Input value={pageSize} onChange={(e, data) => {
-                    console.log(data)
-                    console.log(onChangePageSize)
                     onChangePageSize(data.value);
                 }}></Input>
-                <Pagination number={Math.ceil(size / pageSize)}/>
+                <Pagination pages={pages} currentPage={currentPage} onChangeCurrentPage={onChangeCurrentPage}/>
             </Table.HeaderCell>
         </Table.Row>
     );
 };
 
 
-const Pagination = ({number}) => {
-    const baginBtn = [];
-    for (let i = 1; i <= number; i++) {
-        baginBtn.push(<Menu.Item key={i} as='a'>{i}</Menu.Item>)
-    }
-    if (number > 1) {
+const Pagination = ({pages, currentPage, onChangeCurrentPage}) => {
+    if (pages > 1) {
+        const baginBtn = [];
+        for (let i = 1; i <= pages; i++) {
+            baginBtn.push(<Menu.Item key={i} active={i === currentPage} as='a' onClick={() => {
+                return onChangeCurrentPage(i);
+            }}>{i}</Menu.Item>)
+        }
         return (
             <Menu floated='right' pagination>
-                <Menu.Item as='a' icon>
+                <Menu.Item as='a' icon disabled={currentPage === 1} onClick={() => {
+                    return onChangeCurrentPage(currentPage - 1);
+                }}>
                     <Icon name='left chevron'/>
                 </Menu.Item>
                 {baginBtn}
-                <Menu.Item as='a' icon>
+                <Menu.Item as='a' icon disabled={currentPage === pages} onClick={()=>{
+                    return onChangeCurrentPage(currentPage + 1);
+                }}>
                     <Icon name='right chevron'/>
                 </Menu.Item>
             </Menu>

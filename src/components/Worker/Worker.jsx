@@ -13,11 +13,11 @@ import {
     Dropdown
 } from 'semantic-ui-react';
 import DismissDatePicker from './DismissDataPicker';
+import * as workerApi from '../../api/worker';
 import {connect} from 'react-redux';
 import PhoneMaskedInput from './PhoneMaskedInput';
 import DriverFields from './DriverFields.jsx';
 import RiggerFields from './RiggerFields.jsx';
-
 import includes from 'lodash/includes';
 
 import {push, goBack} from 'react-router-redux';
@@ -33,10 +33,6 @@ class Worker extends React.Component {
             positions: [],
             formLoading: false,
         }
-    }
-
-    componentDidUpdate() {
-        console.log(this.state)
     }
 
     render() {
@@ -85,6 +81,15 @@ class Worker extends React.Component {
                                               }}/>
                                 <Button fluid positive onClick={(e) => {
                                     e.preventDefault();
+                                    this.setState({formLoading: true});
+                                    this.props.createWorker({
+                                        firstName: this.state.firstName,
+                                        secondName: this.state.secondName,
+                                        telephone: this.state.telephone,
+                                    })
+                                        .finally(()=>{
+                                            this.setState({formLoading: false});
+                                        })
                                 }}>Отправить</Button>
                                 <Divider horizontal></Divider>
                                 <Button fluid color='orange' onClick={(e) => {
@@ -109,6 +114,12 @@ export default connect(state => {
             {key: 'rigger', text: 'Стропальщик', value: 'rigger'},
             {key: 'accountant', text: 'Бухгалтер', value: 'accountant'}
         ]
+    }
+}, ()=>{
+    return {
+        createWorker: (worker)=>{
+            return workerApi.create(worker);
+        }
     }
 })(Worker);
 

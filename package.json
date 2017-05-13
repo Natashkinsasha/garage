@@ -32,7 +32,8 @@
     "router": "^1.2.0",
     "semantic-ui-css": "^2.2.4",
     "semantic-ui-react": "^0.64.8",
-    "semantic-ui-react-numberpicker": "0.0.1-b"
+    "semantic-ui-react-numberpicker": "0.0.1-b",
+    "text-mask-addons": "^3.5.0"
   },
   "devDependencies": {
     "autoprefixer-loader": "*",
