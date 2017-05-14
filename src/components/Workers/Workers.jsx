@@ -1,6 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import Promise from 'bluebird';
+import R from 'ramda';
 import * as workerApi from '../../api/worker';
 
 import {Table, Checkbox, Button, Dimmer, Loader, Segment, Modal, Form, Grid} from 'semantic-ui-react';
@@ -26,35 +27,38 @@ class Workers extends React.Component {
     }
 
     componentDidMount = () => {
-
         this.onChange({currentPage: this.state.currentPage, pageSize: this.state.pageSize});
     };
 
 
     deleteWorkers = () => {
         this.setState({isActiveWorkersTable: true});
-        this.props.deleteWorkers(this.state.checkeds).then(() => {
-            this.setState({isActiveWorkersTable: false});
-        });
+        Promise
+            .resolve(this.state.selectedWorkers)
+            .then(R.pluck('id'))
+            .then(this.props.deleteWorkers)
+            .catch((res) => {
+
+            })
+            .finally(() => {
+                this.setState({isActiveWorkerTable: false});
+            })
+            .then((res) => {
+                return this.getWorkers({currentPage: 1, pageSize: this.state.pageSize})
+            })
     };
 
-    onSelectWorker = (id) => {
-        this.setState({selectedWorker: find(this.props.workers, {'id': id})})
-    };
-
-    onSelectedWorkers = (selected) => {
-        this.setState({selectedWorkers: selected});
-    };
-
-    onChange = ({currentPage, pageSize, sortedColumn, direction}) => {
+    getWorkers = ({currentPage, pageSize, sortedColumn, direction}) => {
         console.log({currentPage, pageSize, sortedColumn, direction})
         this.setState({isActiveWorkerTable: true}, () => {
-            this.props.getWorkers({page: currentPage, number: pageSize})
+            this.props.getWorkers({page: currentPage, number: pageSize, sortedColumn, direction})
                 .then(({docs, page, pages, limit}) => {
                     this.setState({
                         workers: docs,
                         pageSize: limit,
                         currentPage: page,
+                        sortedColumn,
+                        direction,
                         pages,
                     })
                 })
@@ -62,6 +66,18 @@ class Workers extends React.Component {
                     this.setState({isActiveWorkerTable: false});
                 })
         });
+    };
+
+    onSelectWorker = (id) => {
+        this.setState({selectedWorker: find(this.state.workers, {'id': id})})
+    };
+
+    onSelectedWorkers = (selected) => {
+        this.setState({selectedWorkers: selected});
+    };
+
+    onChange = ({currentPage, pageSize, sortedColumn, direction}) => {
+        return this.getWorkers({currentPage, pageSize, sortedColumn, direction})
     };
 
     render() {
@@ -77,6 +93,8 @@ class Workers extends React.Component {
                                          pageSize={this.state.pageSize}
                                          currentPage={this.state.currentPage}
                                          pages={this.state.pages}
+                                         sortedColumn={this.state.sortedColumn}
+                                         direction={this.state.direction}
                                          onRowClick={this.onSelectWorker}
                                          onSelected={this.onSelectedWorkers}
                                          onDeleteWorkers={this.deleteWorkers}
@@ -96,11 +114,11 @@ class Workers extends React.Component {
 
 export default connect(null, dispatch => {
     return {
-        deleteWorkers: () => {
-            return Promise.resolve().delay(1000);
+        deleteWorkers: (ids) => {
+            return workerApi.remove(ids);
         },
-        getWorkers: ({page, number}) => {
-            return workerApi.get({page, number}).get('data');
+        getWorkers: ({page, number, sortedColumn, direction}) => {
+            return workerApi.get({page, number, sortedColumn, direction}).get('data');
         }
     }
 })(Workers);

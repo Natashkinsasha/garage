@@ -12,14 +12,14 @@ import {
     Divider,
     Dropdown
 } from 'semantic-ui-react';
-import DismissDatePicker from './DismissDataPicker';
+
 import * as workerApi from '../../api/worker';
 import {connect} from 'react-redux';
 import PhoneMaskedInput from './PhoneMaskedInput';
 import DriverFields from './DriverFields.jsx';
 import RiggerFields from './RiggerFields.jsx';
 import includes from 'lodash/includes';
-
+import DismisDataPicker from './DismisDataPicker.jsx'
 import {push, goBack} from 'react-router-redux';
 
 class Worker extends React.Component {
@@ -64,7 +64,7 @@ class Worker extends React.Component {
                                             selected={this.state.dismissalData}
                                             onChange={(date) => {
                                                 this.setState({dismissalData: date});
-                                            }} control={DismissDatePicker}/>
+                                            }} control={DismisDataPicker}/>
                                 <Form.Dropdown label='Должности' multiple selection
                                                required
                                                options={this.props.positions}

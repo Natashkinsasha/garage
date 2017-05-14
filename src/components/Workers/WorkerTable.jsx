@@ -14,19 +14,27 @@ import {
     Icon,
     Dropdown
 } from 'semantic-ui-react';
+
 import without from 'lodash/without';
 import concat from 'lodash/concat';
+import reduce from 'lodash/reduce';
+import fill from 'lodash/fill';
 import isEmpty from 'lodash/isEmpty';
 import clone from 'lodash/clone';
+import PaginationMaskInput from './PaginationMaskInput.jsx';
 
 
 class WorkerTable extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            checkeds: [],
+            checkeds: fill(Array(this.props.workers.length), false),
         }
     }
+
+    componentWillReceiveProps = (newProps) => {
+        this.setState({checkeds: fill(Array(this.props.workers.length), false)})
+    };
 
     onClickCheckbox = (index) => {
         let newSelected = clone(this.state.checkeds);
@@ -36,24 +44,24 @@ class WorkerTable extends React.Component {
             newSelected[index] = true;
         }
         this.setState({checkeds: newSelected});
-        this.props.onSelected(newSelected);
+        this.props.onSelected(WorkerTable.getSelectedWorkers(this.props.workers, newSelected));
     };
 
     onClickHeaderCheckbox = () => {
         let newSelected = [];
         if (this.state.checkeds.includes(true)) {
-            newSelected = Array.apply(null, {length: this.props.workers.length}).fill(false);
+            newSelected = fill(Array(this.props.workers.length), false);
         } else {
-            newSelected = Array.apply(null, {length: this.props.workers.length}).fill(true);
+            newSelected = fill(Array(this.props.workers.length), true);
         }
         this.setState({checkeds: newSelected});
-        this.props.onSelected(newSelected);
+        this.props.onSelected(WorkerTable.getSelectedWorkers(this.props.workers, newSelected));
 
     };
 
     onChangePageSize = (pageSize) => {
         this.props.onChange({
-            currentPage: this.props.currentPage,
+            currentPage: 1,
             pageSize,
             sortedColumn: this.props.sortedColumn,
             direction: this.props.direction
@@ -78,18 +86,36 @@ class WorkerTable extends React.Component {
         });
     };
 
+    pageSize = (pageSize, pages, number) => {
+        if (pages === 1) {
+            return number;
+        }
+        return pageSize;
+    };
+
+    static getSelectedWorkers(workers, selected) {
+        return reduce(selected, (selectedWorkers, checked, position) => {
+            if (checked) {
+                selectedWorkers = [...selectedWorkers, workers[position]]
+            }
+            return selectedWorkers;
+        }, []);
+    }
+
 
     render() {
         return (
             <div>
-                <Table size="small" celled selectable tableData={this.props.workers}
+                <Table size="small" celled selectable sortable tableData={this.props.workers}
                        headerRow={<WorkersTableHeader checkeds={this.state.checkeds}
+                                                      sortedColumn={this.props.sortedColumn}
+                                                      direction={this.props.direction}
                                                       onClickCheckbox={this.onClickHeaderCheckbox}
                                                       onChangeSort={this.onChangeSort}
                        />}
                        footerRow={<WorkersTableFooter onDeleteWorkers={this.props.onDeleteWorkers}
                                                       pages={this.props.pages}
-                                                      pageSize={this.props.pageSize}
+                                                      pageSize={this.pageSize(this.props.pageSize, this.props.pages, this.props.workers.length)}
                                                       currentPage={this.props.currentPage}
                                                       onChangePageSize={this.onChangePageSize}
                                                       onChangeCurrentPage={this.onChangeCurrentPage}
@@ -121,14 +147,16 @@ WorkerTable.propTypes = {
 };
 
 
-const WorkersTableHeader = ({onClickCheckbox, checkeds}) => {
+const WorkersTableHeader = ({onClickCheckbox, onChangeSort, checkeds, sortedColumn, direction}) => {
     return (
         <Table.Row>
             <Table.HeaderCell><Checkbox checked={!isEmpty(checkeds) && !checkeds.includes(false)} onClick={(e) => {
                 e.stopPropagation();
                 onClickCheckbox();
             }}/></Table.HeaderCell>
-            <Table.HeaderCell>Фамилия, инициалы</Table.HeaderCell>
+            <Table.HeaderCell sorted={sortedColumn === 'firstName' && direction} onClick={()=>{
+                return onChangeSort('firstName', direction === 'ascending' ? 'descending' : 'ascending');
+            }}>Фамилия, инициалы</Table.HeaderCell>
             <Table.HeaderCell>Должности</Table.HeaderCell>
         </Table.Row>
     );
@@ -156,9 +184,9 @@ const WorkersTableFooter = ({onDeleteWorkers, pages, pageSize, currentPage, onCh
             <Table.HeaderCell colSpan='4'>
                 <Button size='small' positive>Добавить работника</Button>
                 <Button size='small' negative onClick={onDeleteWorkers}>Удалить работников</Button>
-                <Input value={pageSize} onChange={(e, data) => {
-                    onChangePageSize(data.value);
-                }}></Input>
+                <PaginationMaskInput value={pageSize} onBlur={(e) => {
+                    onChangePageSize(e.target.value);
+                }}></PaginationMaskInput>
                 <Pagination pages={pages} currentPage={currentPage} onChangeCurrentPage={onChangeCurrentPage}/>
             </Table.HeaderCell>
         </Table.Row>
@@ -182,7 +210,7 @@ const Pagination = ({pages, currentPage, onChangeCurrentPage}) => {
                     <Icon name='left chevron'/>
                 </Menu.Item>
                 {baginBtn}
-                <Menu.Item as='a' icon disabled={currentPage === pages} onClick={()=>{
+                <Menu.Item as='a' icon disabled={currentPage === pages} onClick={() => {
                     return onChangeCurrentPage(currentPage + 1);
                 }}>
                     <Icon name='right chevron'/>

@@ -7,11 +7,13 @@ export function getById(id) {
     return axios.get(`/api/worker/${id}`);
 }
 
-export function get({page = 1, number = 10}) {
+export function get({page = 1, number = 10, sortedColumn, direction}) {
     return new Promise((resolve, reject) => axios.get(`/api/worker`, {
         params: {
             page,
             number,
+            sortedColumn,
+            direction,
         }
     }).then(resolve, reject));
 }
@@ -25,9 +27,10 @@ export function update(worker) {
 }
 
 export function remove(ids) {
-    return axios.delete(`/api/worker`, {
-        params: {
-            ids,
-        }
-    });
+    return new Promise((resolve, reject) => axios({
+        method: 'delete',
+        url: '/api/worker',
+        data: {ids},
+    })
+        .then(resolve, reject));
 }
