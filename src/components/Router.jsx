@@ -13,7 +13,7 @@ import Worksheet from './Worksheet.jsx'
 import 'semantic-ui-css/semantic.css';
 import VisibleOnlyFor from '../util/auth';
 import SingUp from './SignUp.jsx';
-import Worker from './Worker/Worker.jsx';
+import Worker from './Workers/Worker/Worker.jsx';
 import Equipment from './Equipment/Equipment.jsx';
 import Workers from './Workers/Workers.jsx';
 

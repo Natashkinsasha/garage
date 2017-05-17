@@ -6,7 +6,7 @@ const initialState = {
     },
     isAuthorized: false,
     response: null
-}
+};
 
 const userReducer = (state = initialState, action) => {
 
@@ -23,6 +23,6 @@ const userReducer = (state = initialState, action) => {
             return {...state, response: action.response};
     }
     return state;
-}
+};
 
 export default userReducer;

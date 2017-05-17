@@ -21,6 +21,7 @@ import reduce from 'lodash/reduce';
 import fill from 'lodash/fill';
 import isEmpty from 'lodash/isEmpty';
 import clone from 'lodash/clone';
+import R from 'ramda';
 import PaginationMaskInput from './PaginationMaskInput.jsx';
 
 
@@ -33,7 +34,9 @@ class WorkerTable extends React.Component {
     }
 
     componentWillReceiveProps = (newProps) => {
-        this.setState({checkeds: fill(Array(this.props.workers.length), false)})
+        if (!R.equals(newProps.workers, this.props.workers)) {
+            this.setState({checkeds: fill(Array(newProps.workers.length), false)});
+        }
     };
 
     onClickCheckbox = (index) => {
@@ -114,17 +117,20 @@ class WorkerTable extends React.Component {
                                                       onChangeSort={this.onChangeSort}
                        />}
                        footerRow={<WorkersTableFooter onDeleteWorkers={this.props.onDeleteWorkers}
+                                                      onAddWorker={this.props.onAddWorker}
                                                       pages={this.props.pages}
                                                       pageSize={this.pageSize(this.props.pageSize, this.props.pages, this.props.workers.length)}
                                                       currentPage={this.props.currentPage}
                                                       onChangePageSize={this.onChangePageSize}
                                                       onChangeCurrentPage={this.onChangeCurrentPage}
+                                                      checkeds={this.state.checkeds}
                        />}
                        renderBodyRow={(data, index) => {
                            return <WorkersTableRow key={data.id} index={index} worker={data}
                                                    onClick={this.props.onRowClick}
                                                    onClickCheckbox={this.onClickCheckbox}
                                                    checked={this.state.checkeds[index]}
+                                                   selectedWorker={this.props.selectedWorker}
                            />;
                        }}
                 />
@@ -154,7 +160,7 @@ const WorkersTableHeader = ({onClickCheckbox, onChangeSort, checkeds, sortedColu
                 e.stopPropagation();
                 onClickCheckbox();
             }}/></Table.HeaderCell>
-            <Table.HeaderCell sorted={sortedColumn === 'firstName' && direction} onClick={()=>{
+            <Table.HeaderCell sorted={sortedColumn === 'firstName' && direction} onClick={() => {
                 return onChangeSort('firstName', direction === 'ascending' ? 'descending' : 'ascending');
             }}>Фамилия, инициалы</Table.HeaderCell>
             <Table.HeaderCell>Должности</Table.HeaderCell>
@@ -163,11 +169,12 @@ const WorkersTableHeader = ({onClickCheckbox, onChangeSort, checkeds, sortedColu
 };
 
 
-const WorkersTableRow = ({worker, index, onClick, onClickCheckbox, checked}) => {
+const WorkersTableRow = ({worker, selectedWorker, index, onClick, onClickCheckbox, checked}) => {
     return (
-        <Table.Row onClick={() => {
-            onClick(worker.id);
-        }}>
+        <Table.Row active={selectedWorker && selectedWorker.id === worker.id}
+                   onClick={() => {
+                       onClick(worker.id);
+                   }}>
             <Table.Cell><Checkbox checked={checked} onClick={(e) => {
                 e.stopPropagation();
                 onClickCheckbox(index);
@@ -178,12 +185,12 @@ const WorkersTableRow = ({worker, index, onClick, onClickCheckbox, checked}) => 
     );
 };
 
-const WorkersTableFooter = ({onDeleteWorkers, pages, pageSize, currentPage, onChangePageSize, onChangeCurrentPage}) => {
+const WorkersTableFooter = ({onDeleteWorkers, onAddWorker, pages, pageSize, currentPage, onChangePageSize, onChangeCurrentPage, checkeds}) => {
     return (
         <Table.Row>
             <Table.HeaderCell colSpan='4'>
-                <Button size='small' positive>Добавить работника</Button>
-                <Button size='small' negative onClick={onDeleteWorkers}>Удалить работников</Button>
+                <Button size='small' positive onClick={onAddWorker}>Добавить работника</Button>
+                <Button size='small' disabled={!checkeds.includes(true)} negative onClick={onDeleteWorkers}>Удалить работников</Button>
                 <PaginationMaskInput value={pageSize} onBlur={(e) => {
                     onChangePageSize(e.target.value);
                 }}></PaginationMaskInput>
@@ -198,7 +205,7 @@ const Pagination = ({pages, currentPage, onChangeCurrentPage}) => {
     if (pages > 1) {
         const baginBtn = [];
         for (let i = 1; i <= pages; i++) {
-            baginBtn.push(<Menu.Item key={i} active={i === currentPage} as='a' onClick={() => {
+            baginBtn.push(<Menu.Item key={i} disabled={i === currentPage} active={i === currentPage} as='a' onClick={() => {
                 return onChangeCurrentPage(i);
             }}>{i}</Menu.Item>)
         }

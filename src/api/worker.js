@@ -4,11 +4,11 @@ axios.Promise = Promise;
 
 
 export function getById(id) {
-    return axios.get(`/api/worker/${id}`);
+    return axios.get(`/api/workers/${id}`);
 }
 
 export function get({page = 1, number = 10, sortedColumn, direction}) {
-    return new Promise((resolve, reject) => axios.get(`/api/worker`, {
+    return new Promise((resolve, reject) => axios.get(`/api/workers`, {
         params: {
             page,
             number,
@@ -19,18 +19,25 @@ export function get({page = 1, number = 10, sortedColumn, direction}) {
 }
 
 export function create(worker) {
-    return axios.post(`/api/worker`, worker);
+    return new Promise((resolve, reject) => axios.post(`/api/workers`, worker).then(resolve, reject));
 }
 
 export function update(worker) {
-    return axios.put(`/api/worker`, worker);
+    return axios.put(`/api/workers`, worker);
 }
 
 export function remove(ids) {
     return new Promise((resolve, reject) => axios({
         method: 'delete',
-        url: '/api/worker',
+        url: '/api/workers',
         data: {ids},
     })
         .then(resolve, reject));
+}
+
+export function getPositions() {
+    return new Promise((resolve, reject) => axios
+        .get(`/api/workers/positions`)
+        .then(resolve, reject));
+
 }
